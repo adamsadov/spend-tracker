@@ -2,8 +2,9 @@
 
 import { forwardRef } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, Pencil, Trash2 } from "lucide-react";
-import { CATEGORIES, getCategory } from "@/lib/categories";
+import { Pencil, Trash2 } from "lucide-react";
+import { CATEGORY_OPTIONS, getCategory } from "@/lib/categories";
+import { Select } from "./Dropdown";
 import { formatMoney, formatShortDate } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import type { CategoryId, Transaction } from "@/lib/types";
@@ -35,22 +36,16 @@ export const TransactionRow = forwardRef<HTMLLIElement, { tx: Transaction; showD
           </button>
           <div className="flex min-w-0 items-center gap-1.5 text-[13px] text-muted">
             {/* Quick category change */}
-            <label className="relative inline-flex shrink-0 items-center gap-0.5 rounded-md text-text-2 hover:text-text">
-              {cat.name}
-              <ChevronDown className="size-3 opacity-60" />
-              <select
-                aria-label={`Category for ${tx.merchant}`}
+            <span className="shrink-0">
+              <Select<CategoryId>
+                variant="inline"
                 value={tx.category}
-                onChange={(e) => update(tx.id, { category: e.target.value as CategoryId })}
-                className="absolute inset-0 cursor-pointer opacity-0"
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+                onChange={(v) => update(tx.id, { category: v })}
+                options={CATEGORY_OPTIONS}
+                ariaLabel={`Category for ${tx.merchant}`}
+                minWidth={220}
+              />
+            </span>
             {meta.length > 0 && <span className="truncate">· {meta.join(" · ")}</span>}
           </div>
         </div>

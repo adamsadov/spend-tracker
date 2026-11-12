@@ -119,6 +119,12 @@ body {
   filter: invert(0.8);
 }
 
+/* Thin, theme-colored scrollbars inside dropdown menus */
+[role="listbox"] {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
 /* Recharts: no focus outline box on click */
 .recharts-wrapper *:focus {
   outline: none;

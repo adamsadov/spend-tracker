@@ -7,6 +7,8 @@ import { CATEGORIES } from "@/lib/categories";
 import { centsToInput, parseMoneyToCents, todayISO } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import type { CategoryId } from "@/lib/types";
+import { Combobox } from "./Dropdown";
+import { CardPicker } from "./CardPicker";
 
 interface FormState {
   amount: string;
@@ -52,7 +54,8 @@ export function TransactionEditor() {
   // Escape closes.
   useEffect(() => {
     if (!editor.open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && closeEditor();
+    // Dropdowns handle their own Escape (and mark it handled) before the modal closes.
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && !e.defaultPrevented && closeEditor();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [editor.open, closeEditor]);
@@ -152,19 +155,13 @@ export function TransactionEditor() {
 
             {/* Merchant */}
             <Field label="Store" error={errors.merchant}>
-              <input
-                list="merchant-options"
-                placeholder="e.g. Trader Joe's"
+              <Combobox
                 value={form.merchant}
-                onChange={(e) => onMerchantChange(e.target.value)}
-                className={inputCls(!!errors.merchant)}
-                autoComplete="off"
+                onChange={onMerchantChange}
+                suggestions={merchants}
+                placeholder="e.g. Trader Joe's"
+                invalid={!!errors.merchant}
               />
-              <datalist id="merchant-options">
-                {merchants.slice(0, 50).map((m) => (
-                  <option key={m} value={m} />
-                ))}
-              </datalist>
             </Field>
 
             {/* Category */}
@@ -203,19 +200,7 @@ export function TransactionEditor() {
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="Card" hint="optional">
-                <input
-                  list="card-options"
-                  placeholder="e.g. Apple Card"
-                  value={form.card}
-                  onChange={(e) => set("card", e.target.value)}
-                  className={inputCls(false)}
-                  autoComplete="off"
-                />
-                <datalist id="card-options">
-                  {cards.map((c) => (
-                    <option key={c} value={c} />
-                  ))}
-                </datalist>
+                <CardPicker value={form.card} onChange={(v) => set("card", v)} />
               </Field>
               <Field label="Date" error={errors.date}>
                 <input

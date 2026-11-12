@@ -33,6 +33,9 @@ export const CATEGORIES: Category[] = [
   { id: "other", name: "Other", color: "var(--s-other)", icon: CircleEllipsis },
 ];
 
+/** Ready-made options for category dropdowns. */
+export const CATEGORY_OPTIONS = CATEGORIES.map((c) => ({ value: c.id, label: c.name, icon: c.icon, color: c.color }));
+
 const BY_ID = Object.fromEntries(CATEGORIES.map((c) => [c.id, c])) as Record<CategoryId, Category>;
 
 export function getCategory(id: CategoryId): Category {

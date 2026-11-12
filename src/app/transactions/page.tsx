@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, Search, X } from "lucide-react";
+import { CreditCard, Search, X } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORY_OPTIONS } from "@/lib/categories";
+import { Select } from "@/components/Dropdown";
 import { formatDayHeading, formatMoney, formatMonthKey, monthKey } from "@/lib/format";
 import { sumCents } from "@/lib/analytics";
 import { TransactionRow } from "@/components/TransactionRow";
@@ -13,7 +14,7 @@ import type { CategoryId, Transaction } from "@/lib/types";
 const ALL = "all";
 
 export default function TransactionsPage() {
-  const { ready, transactions, cards, clearAll, loadSample } = useStore();
+  const { ready, transactions, usedCards, clearAll, loadSample } = useStore();
   const [month, setMonth] = useState<string>(ALL);
   const [category, setCategory] = useState<CategoryId | typeof ALL>(ALL);
   const [card, setCard] = useState<string>(ALL);
@@ -80,31 +81,39 @@ export default function TransactionsPage() {
             />
           </label>
           <div className="flex gap-2 overflow-x-auto pb-0.5 [scrollbar-width:none]">
-            <FilterSelect label="Month" value={month} onChange={setMonth}>
-              <option value={ALL}>All months</option>
-              {months.map((m) => (
-                <option key={m} value={m}>
-                  {formatMonthKey(m)}
-                </option>
-              ))}
-            </FilterSelect>
-            <FilterSelect label="Category" value={category} onChange={(v) => setCategory(v as CategoryId | typeof ALL)}>
-              <option value={ALL}>All categories</option>
-              {CATEGORIES.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </FilterSelect>
-            <FilterSelect label="Card" value={card} onChange={setCard}>
-              <option value={ALL}>All cards</option>
-              {cards.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-              <option value="__none">No card</option>
-            </FilterSelect>
+            <Select
+              variant="pill"
+              ariaLabel="Filter by month"
+              value={month}
+              onChange={setMonth}
+              highlighted={month !== ALL}
+              options={[
+                { value: ALL, label: "All months" },
+                ...months.map((m) => ({ value: m, label: formatMonthKey(m) })),
+              ]}
+            />
+            <Select<CategoryId | typeof ALL>
+              variant="pill"
+              ariaLabel="Filter by category"
+              value={category}
+              onChange={setCategory}
+              highlighted={category !== ALL}
+              minWidth={230}
+              options={[{ value: ALL, label: "All categories" }, ...CATEGORY_OPTIONS]}
+            />
+            <Select
+              variant="pill"
+              ariaLabel="Filter by card"
+              value={card}
+              onChange={setCard}
+              highlighted={card !== ALL}
+              minWidth={220}
+              options={[
+                { value: ALL, label: "All cards" },
+                ...usedCards.map((c) => ({ value: c, label: c, icon: CreditCard })),
+                { value: "__none", label: "No card" },
+              ]}
+            />
             <AnimatePresence>
               {hasFilters && (
                 <motion.button
@@ -168,34 +177,5 @@ export default function TransactionsPage() {
         </div>
       )}
     </div>
-  );
-}
-
-function FilterSelect({
-  label,
-  value,
-  onChange,
-  children,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  children: React.ReactNode;
-}) {
-  const active = value !== ALL;
-  return (
-    <label className="relative shrink-0">
-      <span className="sr-only">{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`h-10 cursor-pointer appearance-none rounded-full border pr-9 pl-4 text-sm outline-none transition focus:ring-4 focus:ring-brand-2/15 ${
-          active ? "border-brand-2 bg-brand-soft text-text" : "border-border bg-surface text-text-2 hover:border-brand-3"
-        }`}
-      >
-        {children}
-      </select>
-      <ChevronDown className="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-muted" />
-    </label>
   );
 }

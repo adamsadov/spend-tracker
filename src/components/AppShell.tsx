@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutGrid, List, Plus } from "lucide-react";
+import { CreditCard, LayoutGrid, List, Plus } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { TransactionEditor } from "./TransactionEditor";
 import { Toast } from "./Toast";
@@ -13,6 +13,8 @@ const NAV = [
   { href: "/", label: "Overview", icon: LayoutGrid },
   { href: "/transactions", label: "Transactions", icon: List },
 ];
+/** Desktop top nav also shows Cards; on mobile it's an icon in the header. */
+const DESKTOP_NAV = [...NAV, { href: "/cards", label: "Cards", icon: CreditCard }];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -33,7 +35,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <nav className="hidden items-center gap-1 sm:flex">
-            {NAV.map(({ href, label }) => {
+            {DESKTOP_NAV.map(({ href, label }) => {
               const active = pathname === href;
               return (
                 <Link
@@ -57,6 +59,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
+            <Link
+              href="/cards"
+              aria-label="Cards"
+              className={`grid size-9 place-items-center rounded-full transition hover:bg-surface-2 sm:hidden ${
+                pathname === "/cards" ? "bg-surface-2 text-text" : "text-text-2"
+              }`}
+            >
+              <CreditCard className="size-[18px]" />
+            </Link>
             <ThemeToggle />
             <button
               onClick={() => openEditor()}
