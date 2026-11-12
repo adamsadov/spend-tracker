@@ -119,6 +119,11 @@ body {
   filter: invert(0.8);
 }
 
+@keyframes caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 /* Thin, theme-colored scrollbars inside dropdown menus */
 [role="listbox"] {
   scrollbar-width: thin;

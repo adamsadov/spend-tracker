@@ -9,6 +9,7 @@ import { useStore } from "@/lib/store";
 import type { CategoryId } from "@/lib/types";
 import { Combobox } from "./Dropdown";
 import { CardPicker } from "./CardPicker";
+import { AmountInput } from "./AmountInput";
 
 interface FormState {
   amount: string;
@@ -133,25 +134,15 @@ export function TransactionEditor() {
             </div>
 
             {/* Amount */}
-            <label className="block">
-              <span className="sr-only">Amount</span>
-              <div
-                className={`flex items-baseline justify-center gap-1 rounded-2xl py-5 transition-colors ${
-                  errors.amount ? "bg-danger-soft" : "bg-surface-2"
-                }`}
-              >
-                <span className="text-2xl font-medium text-muted">$</span>
-                <input
-                  ref={amountRef}
-                  inputMode="decimal"
-                  placeholder="0.00"
-                  value={form.amount}
-                  onChange={(e) => set("amount", sanitizeAmount(e.target.value))}
-                  className="tabular w-44 bg-transparent text-center text-4xl font-semibold tracking-tight outline-none placeholder:text-muted/50"
-                />
-              </div>
+            <div>
+              <AmountInput
+                ref={amountRef}
+                value={form.amount}
+                onChange={(v) => set("amount", sanitizeAmount(v))}
+                invalid={!!errors.amount}
+              />
               <FieldError msg={errors.amount} />
-            </label>
+            </div>
 
             {/* Merchant */}
             <Field label="Store" error={errors.merchant}>
