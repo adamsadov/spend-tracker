@@ -7,6 +7,8 @@ import { CreditCard, LayoutGrid, List, Plus } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { TransactionEditor } from "./TransactionEditor";
 import { Toast } from "./Toast";
+import { AccountMenu } from "./AccountMenu";
+import { Banners } from "./Banners";
 import { useStore } from "@/lib/store";
 
 const NAV = [
@@ -19,6 +21,9 @@ const DESKTOP_NAV = [...NAV, { href: "/cards", label: "Cards", icon: CreditCard 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { openEditor } = useStore();
+
+  // Sign-in screens have their own full-page layout.
+  if (pathname === "/login" || pathname.startsWith("/auth")) return <>{children}</>;
 
   return (
     <div className="min-h-dvh">
@@ -76,11 +81,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Plus className="size-4" strokeWidth={2.5} />
               Add expense
             </button>
+            <AccountMenu />
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 pt-6 pb-32 sm:px-6 sm:pb-16">{children}</main>
+      <main className="mx-auto max-w-5xl px-4 pt-6 pb-32 sm:px-6 sm:pb-16">
+        <Banners />
+        {children}
+      </main>
 
       {/* Mobile bottom bar */}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border/70 bg-bg/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl sm:hidden">
