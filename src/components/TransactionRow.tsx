@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, memo } from "react";
 import { motion } from "framer-motion";
 import { Pencil, Trash2 } from "lucide-react";
 import { CATEGORY_OPTIONS, getCategory } from "@/lib/categories";
@@ -9,7 +9,8 @@ import { formatMoney, formatShortDate } from "@/lib/format";
 import { useStore } from "@/lib/store";
 import type { CategoryId, Transaction } from "@/lib/types";
 
-export const TransactionRow = forwardRef<HTMLLIElement, { tx: Transaction; showDate?: boolean }>(
+/** Memoized: a row only re-renders when its own transaction changes. */
+export const TransactionRow = memo(forwardRef<HTMLLIElement, { tx: Transaction; showDate?: boolean }>(
   function TransactionRow({ tx, showDate = false }, ref) {
     const { openEditor, remove, update } = useStore();
     const cat = getCategory(tx.category);
@@ -71,4 +72,4 @@ export const TransactionRow = forwardRef<HTMLLIElement, { tx: Transaction; showD
       </motion.li>
     );
   },
-);
+));

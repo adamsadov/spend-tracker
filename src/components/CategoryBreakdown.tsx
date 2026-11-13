@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BarChart3, PieChart as PieIcon } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
@@ -12,7 +12,8 @@ import { Card, Segmented } from "./ui";
 
 type View = "donut" | "bars";
 
-export function CategoryBreakdown({
+/** Memoized: only re-renders when its totals change, not when something else on the page does. */
+export const CategoryBreakdown = memo(function CategoryBreakdown({
   totals,
   totalCents,
   periodKey,
@@ -168,4 +169,4 @@ export function CategoryBreakdown({
       )}
     </Card>
   );
-}
+});

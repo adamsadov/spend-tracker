@@ -30,7 +30,7 @@ export default function OverviewPage() {
   const [period, setPeriod] = useState<Period>(() => currentPeriod("month"));
 
   const inThis = useMemo(() => transactions.filter((t) => inPeriod(t, period)), [transactions, period]);
-  const prevPeriod = shiftPeriod(period, -1);
+  const prevPeriod = useMemo(() => shiftPeriod(period, -1), [period]);
   const prevTotal = useMemo(() => sumCents(transactions.filter((t) => inPeriod(t, prevPeriod))), [transactions, prevPeriod]);
   const total = sumCents(inThis);
   const totals = useMemo(() => totalsByCategory(inThis), [inThis]);

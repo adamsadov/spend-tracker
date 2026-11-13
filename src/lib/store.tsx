@@ -14,6 +14,7 @@ import type { User } from "@supabase/supabase-js";
 import type { CategoryId, Transaction, TransactionInput } from "./types";
 import { makeSampleTransactions } from "./sample";
 import { createClient } from "./supabase/client";
+import { useUIActions } from "./ui";
 
 /*
  * Data layer, backed by Supabase.
@@ -29,12 +30,6 @@ const LEGACY_CARDS_KEY = "budget-tracker:cards:v1";
 const LEGACY_DONE_KEY = "budget-tracker:local-import-done";
 
 const PAGE = 1000; // Supabase returns at most 1000 rows per request.
-
-interface Toast {
-  id: number;
-  message: string;
-  undo?: () => void;
-}
 
 export interface Account {
   id: string;
@@ -76,12 +71,9 @@ interface StoreValue {
   importLocal: () => Promise<void>;
   dismissLocalImport: () => void;
 
-  /* UI state shared across pages */
-  editor: { open: boolean; editing: Transaction | null };
+  /* Dialog controls (stable; the dialog's own state lives in lib/ui) */
   openEditor: (tx?: Transaction) => void;
   closeEditor: () => void;
-  toast: Toast | null;
-  dismissToast: () => void;
 }
 
 const StoreContext = createContext<StoreValue | null>(null);
@@ -211,12 +203,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [cardRows, setCardRows] = useState<CardRow[]>([]);
-  const [editor, setEditor] = useState<StoreValue["editor"]>({ open: false, editing: null });
-  const [toast, setToast] = useState<Toast | null>(null);
+  const { showToast, dismissToast, openEditor, closeEditor } = useUIActions();
   const [legacy, setLegacy] = useState<ReturnType<typeof readLegacy>>(null);
   const [importing, setImporting] = useState(false);
 
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const txRef = useRef<Transaction[]>([]);
   txRef.current = transactions;
   const cardsRef = useRef<CardRow[]>([]);
@@ -278,18 +268,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, [authResolved, userId, supabase]);
-
-  /* Toasts */
-  const showToast = useCallback((message: string, undo?: () => void) => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToast({ id: Date.now(), message, undo });
-    toastTimer.current = setTimeout(() => setToast(null), 5000);
-  }, []);
-
-  const dismissToast = useCallback(() => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToast(null);
-  }, []);
 
   /** Runs a save in the background; on failure, undoes the on-screen change. */
   const sync = useCallback(
@@ -555,9 +533,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [legacy],
   );
 
-  const openEditor = useCallback((tx?: Transaction) => setEditor({ open: true, editing: tx ?? null }), []);
-  const closeEditor = useCallback(() => setEditor((e) => ({ ...e, open: false })), []);
-
   const value = useMemo<StoreValue>(
     () => ({
       ready,
@@ -580,16 +555,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       importing,
       importLocal,
       dismissLocalImport,
-      editor,
       openEditor,
       closeEditor,
-      toast,
-      dismissToast,
     }),
     [
       ready, loadError, account, signOut, transactions, add, update, remove, loadSample, clearAll, cards,
       usedCards, addCard, renameCard, removeCard, merchants, localImport, importing, importLocal,
-      dismissLocalImport, editor, openEditor, closeEditor, toast, dismissToast,
+      dismissLocalImport, openEditor, closeEditor,
     ],
   );
 

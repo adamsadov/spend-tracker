@@ -1,11 +1,13 @@
 "use client";
 
+import { memo } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatMoney, formatMoneyShort } from "@/lib/format";
 import type { Period, TrendPoint } from "@/lib/analytics";
 import { Card } from "./ui";
 
-export function SpendingTrend({ data, period }: { data: TrendPoint[]; period: Period }) {
+/** Memoized: only re-renders when its data changes, not when something else on the page does. */
+export const SpendingTrend = memo(function SpendingTrend({ data, period }: { data: TrendPoint[]; period: Period }) {
   const hasData = data.some((d) => d.cents > 0);
   const isMonth = period.kind === "month";
 
@@ -66,4 +68,4 @@ export function SpendingTrend({ data, period }: { data: TrendPoint[]; period: Pe
       </div>
     </Card>
   );
-}
+});

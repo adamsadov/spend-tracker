@@ -6,6 +6,7 @@ import { Trash2, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/categories";
 import { centsToInput, parseMoneyToCents, todayISO } from "@/lib/format";
 import { useStore } from "@/lib/store";
+import { useEditorState } from "@/lib/ui";
 import type { CategoryId } from "@/lib/types";
 import { Combobox } from "./Dropdown";
 import { CardPicker } from "./CardPicker";
@@ -23,8 +24,16 @@ interface FormState {
 const EMPTY: FormState = { amount: "", merchant: "", category: null, card: "", date: "", note: "" };
 
 export function TransactionEditor() {
-  const { editor, closeEditor, add, update, remove, cards, merchants, transactions } = useStore();
+  const { closeEditor, add, update, remove, cards, merchants, transactions } = useStore();
+  const editor = useEditorState();
   const editing = editor.editing;
+  // Saving updates the charts behind the dialog, which is heavy work. Doing it
+  // after the close animation finishes keeps that animation smooth.
+  const pendingCommit = useRef<(() => void) | null>(null);
+  const closeThen = (commit: () => void) => {
+    pendingCommit.current = commit;
+    closeEditor();
+  };
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [categoryTouched, setCategoryTouched] = useState(false);
@@ -93,13 +102,17 @@ export function TransactionEditor() {
       date: form.date,
       note: form.note.trim(),
     };
-    if (editing) update(editing.id, payload);
-    else add(payload);
-    closeEditor();
+    closeThen(() => (editing ? update(editing.id, payload) : add(payload)));
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence
+      onExitComplete={() => {
+        const commit = pendingCommit.current;
+        pendingCommit.current = null;
+        commit?.();
+      }}
+    >
       {editor.open && (
         <div className="fixed inset-0 z-40 flex items-end justify-center sm:items-center sm:p-6">
           <motion.div
@@ -217,8 +230,8 @@ export function TransactionEditor() {
                 <button
                   type="button"
                   onClick={() => {
-                    remove(editing.id);
-                    closeEditor();
+                    const id = editing.id;
+                    closeThen(() => remove(id));
                   }}
                   className="grid size-12 shrink-0 place-items-center rounded-2xl border border-border text-danger transition hover:bg-danger-soft"
                   aria-label="Delete transaction"
