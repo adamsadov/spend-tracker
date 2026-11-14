@@ -114,11 +114,6 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Native date picker icon follows the theme */
-.dark input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.8);
-}
-
 @keyframes caret-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }

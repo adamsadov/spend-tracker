@@ -30,7 +30,16 @@ interface Position {
   up: boolean;
 }
 
-function useAnchoredPosition(open: boolean, anchor: RefObject<HTMLElement | null>, minWidth: number) {
+/**
+ * Fixed position for a popover anchored under (or, when there's no room, above) `anchor`.
+ * `needHeight` is how much space below is enough before it flips up.
+ */
+export function useAnchoredPosition(
+  open: boolean,
+  anchor: RefObject<HTMLElement | null>,
+  minWidth: number,
+  needHeight = 220,
+) {
   const [pos, setPos] = useState<Position | null>(null);
 
   useLayoutEffect(() => {
@@ -43,7 +52,7 @@ function useAnchoredPosition(open: boolean, anchor: RefObject<HTMLElement | null
       const vw = window.innerWidth;
       const below = vh - r.bottom - 12;
       const above = r.top - 12;
-      const up = below < 220 && above > below;
+      const up = below < needHeight && above > below;
       const width = Math.min(Math.max(r.width, minWidth), vw - 16);
       const left = Math.max(8, Math.min(r.left, vw - width - 8));
       setPos(
@@ -59,12 +68,12 @@ function useAnchoredPosition(open: boolean, anchor: RefObject<HTMLElement | null
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update, true);
     };
-  }, [open, anchor, minWidth]);
+  }, [open, anchor, minWidth, needHeight]);
 
   return pos;
 }
 
-function useClickOutside(open: boolean, refs: RefObject<HTMLElement | null>[], onOutside: () => void) {
+export function useClickOutside(open: boolean, refs: RefObject<HTMLElement | null>[], onOutside: () => void) {
   useEffect(() => {
     if (!open) return;
     const handler = (e: PointerEvent) => {
@@ -80,7 +89,7 @@ function useClickOutside(open: boolean, refs: RefObject<HTMLElement | null>[], o
 
 /* ---------- Menu panel ---------- */
 
-function MenuPanel({
+export function MenuPanel({
   open,
   pos,
   panelRef,

@@ -11,6 +11,7 @@ import type { CategoryId } from "@/lib/types";
 import { Combobox } from "./Dropdown";
 import { CardPicker } from "./CardPicker";
 import { AmountInput } from "./AmountInput";
+import { DatePicker } from "./DatePicker";
 
 interface FormState {
   amount: string;
@@ -207,12 +208,7 @@ export function TransactionEditor() {
                 <CardPicker value={form.card} onChange={(v) => set("card", v)} />
               </Field>
               <Field label="Date" error={errors.date}>
-                <input
-                  type="date"
-                  value={form.date}
-                  onChange={(e) => set("date", e.target.value)}
-                  className={inputCls(!!errors.date)}
-                />
+                <DatePicker value={form.date} onChange={(v) => set("date", v)} invalid={!!errors.date} />
               </Field>
             </div>
 

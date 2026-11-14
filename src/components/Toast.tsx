@@ -23,7 +23,9 @@ export function Toast() {
             {toast.undo ? (
               <button
                 onClick={toast.undo}
-                className="rounded-full bg-bg/15 px-3 py-1 font-medium text-brand-3 transition hover:bg-bg/25"
+                // The toast inverts the theme (dark pill in light mode, light pill in dark mode),
+                // so the Undo button needs its own colors per theme to stay readable.
+                className="rounded-full bg-bg/15 px-3 py-1 font-medium text-brand-3 transition hover:bg-bg/25 dark:bg-[#135e4b]/12 dark:text-[#135e4b] dark:hover:bg-[#135e4b]/20"
               >
                 Undo
               </button>
